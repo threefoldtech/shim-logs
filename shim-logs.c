@@ -120,6 +120,11 @@ int main() {
                     stream_recall(target->stream);
                 }
             }
+
+            if(ev->events & EPOLLERR || ev->events & EPOLLHUP) {
+                printf("[-] file descriptor closed\n");
+                return 1;
+            }
         }
     }
 
