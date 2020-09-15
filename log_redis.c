@@ -24,6 +24,7 @@ int redis_write(void *_self, char *line, int len) {
 
 redis_t *redis_new(char *host, int port, char *channel, char *password) {
     redis_t *backend;
+    redisReply *reply;
     struct timeval timeout = { 2, 0 };
 
     printf("[+] redis backend: [%s:%d / %s]\n", host, port, channel);
@@ -40,8 +41,6 @@ redis_t *redis_new(char *host, int port, char *channel, char *password) {
     }
 
     if(password) {
-        redisReply *reply;
-
         if(!(reply = redisCommand(backend->conn, "AUTH %s", password)))
             diep("redis");
 
@@ -50,6 +49,14 @@ redis_t *redis_new(char *host, int port, char *channel, char *password) {
 
         freeReplyObject(reply);
     }
+
+    if(!(reply = redisCommand(backend->conn, "PING")))
+        diep("redis");
+
+    if(reply->type == REDIS_REPLY_ERROR)
+        printf("redis: could not access redis: %s\n", reply->str);
+
+    freeReplyObject(reply);
 
     backend->channel = strdup(channel);
     backend->write = redis_write;
