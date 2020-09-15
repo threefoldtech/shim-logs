@@ -22,7 +22,7 @@ int redis_write(void *_self, char *line, int len) {
     return 0;
 }
 
-redis_t *redis_new(char *host, int port, char *channel) {
+redis_t *redis_new(char *host, int port, char *channel, char *password) {
     redis_t *backend;
     struct timeval timeout = { 2, 0 };
 
@@ -37,6 +37,18 @@ redis_t *redis_new(char *host, int port, char *channel) {
     if(backend->conn->err) {
         printf("redis: %s\n", backend->conn->errstr);
         return NULL;
+    }
+
+    if(password) {
+        redisReply *reply;
+
+        if(!(reply = redisCommand(backend->conn, "AUTH %s", password)))
+            diep("redis");
+
+        if(reply->type == REDIS_REPLY_ERROR)
+            printf("redis: authentication failed\n");
+
+        freeReplyObject(reply);
     }
 
     backend->channel = strdup(channel);
@@ -56,7 +68,7 @@ static int redis_attach(const char *url, log_t *target) {
     if(purl->port)
         port = atoi(purl->port);
 
-    if(!(redis = redis_new(purl->host, port, purl->path)))
+    if(!(redis = redis_new(purl->host, port, purl->path, purl->password)))
         return 1;
 
     parsed_url_free(purl);

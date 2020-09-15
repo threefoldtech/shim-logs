@@ -82,7 +82,7 @@
     } redis_t;
 
     int redis_write(void *_self, char *line, int len);
-    redis_t *redis_new(char *host, int port, char *channel);
+    redis_t *redis_new(char *host, int port, char *channel, char *password);
     int redis_extract(container_t *c, json_t *root);
 
     //
