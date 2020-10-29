@@ -25,3 +25,39 @@ It follow the workflow that `containerd` provides:
 respectively stdout, stderr and ready notifier.
 - As soon as logs are ready, 5 is closed
 - 3 and 4 are read async and forwarded to specified endpoint
+
+# Debugging
+
+You can also use this tool to simulate containerd behaviors to write your own shim
+module. On the `tools` directory, you have a small tool used to simulate a `shim` process
+started like it would be on containerd with samed `fd` attached etc.
+
+# Testing
+
+You can test out-of-box the `shim-logs redis` endpoint by compiling `tools` and creating
+small local environment:
+```
+mkdir -p /var/cache/modules/contd/config/maxux
+mkdir -p /var/cache/modules/contd/logs/maxux
+chown $USER /var/cache/modules/contd/logs/maxux
+```
+
+And set the `/var/cache/modules/contd/config/maxux/debug-logs.json` file:
+```json
+[
+    {
+        "type": "redis",
+        "data": {
+            "stdout": "redis://:foobared@127.0.0.2/stdout",
+            "stderr": "redis://127.0.0.1/stderr"
+        }
+    }
+]
+```
+
+You can then start `./shim-spawn` on the `tools` directory to forward generated text to redis.
+Example below use one connection password protected for stdout.
+
+# Cleanup Testing
+
+Just delete debug directory: `rm -rf /var/cache/modules/contd`
