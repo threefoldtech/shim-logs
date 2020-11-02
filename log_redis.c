@@ -14,8 +14,10 @@ int redis_write(void *_self, char *line, int len) {
     redis_t *self = (redis_t *) _self;
     redisReply *reply;
 
-    if(!(reply = redisCommand(self->conn, "PUBLISH %s %s", self->channel, line)))
-        diep("redis");
+    if(!(reply = redisCommand(self->conn, "PUBLISH %s %s", self->channel, line))) {
+        fprintf(stderr, "[-] redis error: %s\n", self->conn->errstr);
+        return 1;
+    }
 
     freeReplyObject(reply);
 
@@ -31,11 +33,15 @@ redis_t *redis_new(char *host, int port, char *channel) {
     if(!(backend = calloc(sizeof(redis_t), 1)))
         diep("calloc");
 
-    if(!(backend->conn = redisConnectWithTimeout(host, port, timeout)))
+    if(!(backend->conn = redisConnectWithTimeout(host, port, timeout))) {
         diep("redis");
+        return NULL;
+    }
 
     if(backend->conn->err) {
-        printf("redis: %s\n", backend->conn->errstr);
+        fprintf(stderr, "[-] redis: %s\n", backend->conn->errstr);
+        redisFree(backend->conn);
+        free(backend);
         return NULL;
     }
 

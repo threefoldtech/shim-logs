@@ -18,8 +18,11 @@ file_t *file_new(char *path) {
     if(!(backend = calloc(sizeof(file_t), 1)))
         diep("calloc");
 
-    if(!(backend->fp = fopen(path, "w")))
-        diep("fopen");
+    if(!(backend->fp = fopen(path, "w"))) {
+        perror("fopen");
+        free(backend);
+        return NULL;
+    }
 
     backend->write = file_write;
 
