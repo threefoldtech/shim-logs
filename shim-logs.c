@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include "url_parser.h"
 #include "shim-logs.h"
 
 void diep(char *str) {
@@ -36,8 +37,26 @@ void attach_localfile(container_t *container) {
     log_attach(container->logerr, local, local->write);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     printf("[+] initializing shim-logs\n");
+
+    if(argc > 1) {
+        // we only support arguments for debugging purpose
+        // the only argument we support is a redis url to
+        // parse it and check validity
+        struct parsed_url *purl = parse_url(argv[1]);
+        if(purl == NULL) {
+            fprintf(stderr, "[-] could not parse provided url\n");
+            exit(EXIT_FAILURE);
+        }
+
+        printf("[+] Host: %s\n", purl->host);
+        printf("[+] Port: %s\n", purl->port);
+        printf("[+] Path: %s\n", purl->path);
+        printf("[+] Pass: %s\n", purl->password);
+
+        return 0;
+    }
 
     //
     // container object
