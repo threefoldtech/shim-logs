@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <sys/types.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include "shim-logs.h"
 
@@ -25,6 +26,7 @@ void attach_localfile(container_t *container) {
 
     sprintf(path, "%s/%s/%s.log", LOGSDIR, container->namespace, container->id);
 
+    // do not crash if we can't open it, silently ignore it
     file_t *local;
     if(!(local = file_new(path)))
         return;
@@ -93,8 +95,12 @@ int main() {
     while(1) {
         int n = epoll_wait(evfd, events, MAXEVENTS, -1);
 
-        if(n < 0)
+        if(n < 0) {
+            if(errno == EINTR)
+                continue;
+
             diep("epoll_wait");
+        }
 
         for(int i = 0; i < n; i++) {
             struct epoll_event *ev = events + i;
