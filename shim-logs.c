@@ -10,7 +10,7 @@
 #include "shim-logs.h"
 
 // epoll_wait timeout
-#define EVTIMEOUT 200
+#define EVTIMEOUT 1000
 
 // global logfile (copy of stdout/stderr)
 FILE *syslogfile = NULL;
