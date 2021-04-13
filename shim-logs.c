@@ -12,6 +12,9 @@
 // epoll_wait timeout
 #define EVTIMEOUT 200
 
+// global logfile (copy of stdout/stderr)
+FILE *syslogfile = NULL;
+
 void diep(char *str) {
     perror(str);
     exit(EXIT_FAILURE);
@@ -39,8 +42,21 @@ void attach_localfile(container_t *container) {
     log_attach(container->logerr, local, local->write);
 }
 
+void syslogfile_init(container_t *container) {
+    char path[512];
+
+    sprintf(path, "%s/%s/%s-sys.log", LOGSDIR, container->namespace, container->id);
+
+    // fallback to stdout if open failed, to not crash
+    if(!(syslogfile = fopen(path, "a"))) {
+        perror(path);
+        syslogfile = stdout;
+    }
+}
+
 int main() {
     printf("[+] initializing shim-logs\n");
+    syslogfile = stdout;
 
     //
     // container object
@@ -50,8 +66,10 @@ int main() {
     if(!(container = container_init()))
         diep("container");
 
+    syslogfile_init(container);
+
     if(!(container_load(container))) {
-        fprintf(stderr, "[-] could not load configuration\n");
+        errlog("[-] could not load configuration\n");
         exit(EXIT_FAILURE);
     }
 
@@ -131,7 +149,7 @@ int main() {
             }
 
             if(ev->events & EPOLLERR || ev->events & EPOLLHUP) {
-                printf("[-] file descriptor closed\n");
+                log("[-] file descriptor closed\n");
                 return 1;
             }
         }

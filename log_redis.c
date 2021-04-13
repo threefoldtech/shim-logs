@@ -15,7 +15,7 @@ int redis_write(void *_self, char *line, int len) {
     redisReply *reply;
 
     if(!(reply = redisCommand(self->conn, "PUBLISH %s %s", self->channel, line))) {
-        fprintf(stderr, "[-] redis error: %s\n", self->conn->errstr);
+        errlog("[-] redis error: %s\n", self->conn->errstr);
         return 1;
     }
 
@@ -29,7 +29,7 @@ redis_t *redis_new(char *host, int port, char *channel, char *password) {
     redisReply *reply;
     struct timeval timeout = { 2, 0 };
 
-    printf("[+] redis backend: [%s:%d / %s]\n", host, port, channel);
+    log("[+] redis backend: [%s:%d / %s]\n", host, port, channel);
 
     if(!(backend = calloc(sizeof(redis_t), 1)))
         diep("calloc");
@@ -40,7 +40,7 @@ redis_t *redis_new(char *host, int port, char *channel, char *password) {
     }
 
     if(backend->conn->err) {
-        fprintf(stderr, "[-] redis: %s\n", backend->conn->errstr);
+        errlog("[-] redis: %s\n", backend->conn->errstr);
         redisFree(backend->conn);
         free(backend);
         return NULL;
@@ -51,7 +51,7 @@ redis_t *redis_new(char *host, int port, char *channel, char *password) {
             diep("redis");
 
         if(reply->type == REDIS_REPLY_ERROR)
-            printf("redis: authentication failed\n");
+            log("redis: authentication failed\n");
 
         freeReplyObject(reply);
     }
@@ -60,7 +60,7 @@ redis_t *redis_new(char *host, int port, char *channel, char *password) {
         diep("redis");
 
     if(reply->type == REDIS_REPLY_ERROR)
-        printf("redis: could not access redis: %s\n", reply->str);
+        log("redis: could not access redis: %s\n", reply->str);
 
     freeReplyObject(reply);
 
