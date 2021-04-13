@@ -9,6 +9,9 @@
 #include <sys/stat.h>
 #include "shim-logs.h"
 
+// epoll_wait timeout
+#define EVTIMEOUT 200
+
 void diep(char *str) {
     perror(str);
     exit(EXIT_FAILURE);
@@ -93,7 +96,7 @@ int main() {
     // async fetching logs
     //
     while(1) {
-        int n = epoll_wait(evfd, events, MAXEVENTS, -1);
+        int n = epoll_wait(evfd, events, MAXEVENTS, EVTIMEOUT);
 
         if(n < 0) {
             if(errno == EINTR)
