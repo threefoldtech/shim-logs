@@ -12,8 +12,8 @@
 
     extern FILE *syslogfile;
 
-    #define log(fmt...) { fprintf(stdout, fmt); fprintf(syslogfile, fmt); }
-    #define errlog(fmt...) { fprintf(stderr, fmt); fprintf(syslogfile, fmt); }
+    #define log(fmt...) { fprintf(stdout, fmt); fprintf(syslogfile, fmt); fflush(stdout); fflush(syslogfile); }
+    #define errlog(fmt...) { fprintf(stderr, fmt); fprintf(syslogfile, fmt); fflush(syslogfile); }
 
     //
     // stream
