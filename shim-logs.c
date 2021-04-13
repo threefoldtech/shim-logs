@@ -16,7 +16,7 @@
 FILE *syslogfile = NULL;
 
 void diep(char *str) {
-    perror(str);
+    errlog("[-] %s: %s\n", str, strerror(errno));
     exit(EXIT_FAILURE);
 }
 
