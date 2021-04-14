@@ -1,7 +1,7 @@
 #ifndef SHIM_LOGS_H
     #define SHIM_LOGS_H
 
-    #define SHIMLOGS_VERSION   "0.3"
+    #define SHIMLOGS_VERSION   "0.4"
 
     #include <hiredis/hiredis.h>
     #include <jansson.h>
