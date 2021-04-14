@@ -55,7 +55,7 @@ void syslogfile_init(container_t *container) {
 }
 
 int main() {
-    printf("[+] initializing shim-logs\n");
+    printf("[+] initializing shim-logs v" SHIMLOGS_VERSION "\n");
     syslogfile = stdout;
 
     //
