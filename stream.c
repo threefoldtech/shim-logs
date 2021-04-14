@@ -40,8 +40,19 @@ char *stream_line(stream_t *s) {
         s->line = malloc(s->length);
 
     char *found = strchr(s->reader, '\n');
-    if(!found)
-        return NULL;
+    if(!found) {
+        if(stream_remain(s) == 0 && s->reader == s->buffer) {
+            // there is no space left for new data
+            // and the reader is at the begining of the buffer
+            // this mean the buffer is full and there is no
+            // new line found, we force flush
+            found = s->writer - 1;
+
+        } else {
+            // no new line found yet, waiting more data
+            return NULL;
+        }
+    }
 
     size_t length = found - s->reader + 1;
 

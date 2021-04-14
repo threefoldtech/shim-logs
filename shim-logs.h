@@ -10,6 +10,11 @@
     // #define CONFDIR     "/tmp/logconf"
     // #define LOGSDIR     "/tmp/logconf"
 
+    extern FILE *syslogfile;
+
+    #define log(fmt...) { fprintf(stdout, fmt); fprintf(syslogfile, fmt); fflush(stdout); fflush(syslogfile); }
+    #define errlog(fmt...) { fprintf(stderr, fmt); fprintf(syslogfile, fmt); fflush(syslogfile); }
+
     //
     // stream
     // contains tools to read and bufferize

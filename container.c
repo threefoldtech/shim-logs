@@ -19,8 +19,8 @@ container_t *container_init() {
     container->errfd = 4;  // stderr fd
 
     if(container->id == NULL) {
-        fprintf(stderr, "[-] could not find container id\n");
-        fprintf(stderr, "[-] ensure your environment is well set\n");
+        errlog("[-] could not find container id\n");
+        errlog("[-] ensure your environment is well set\n");
         exit(EXIT_FAILURE);
     }
 
@@ -34,7 +34,7 @@ container_t *container_init() {
 }
 
 void container_ready(container_t *container) {
-    printf("[+] sending ready signal\n");
+    log("[+] sending ready signal\n");
 
     if(write(container->lockfd, "X", 1) != 1)
         perror("write");
@@ -65,7 +65,7 @@ char *container_load_config(char *path) {
 }
 
 static void *json_error(json_t *root, char *message) {
-    fprintf(stderr, "[-] json: %s\n", message);
+    errlog("[-] json: %s\n", message);
     json_decref(root);
     return NULL;
 }
@@ -93,7 +93,7 @@ container_t *container_load_parse(container_t *c, json_t *root) {
 
         } else {
             // only supporting redis for now
-            fprintf(stderr, "[-] config: unsupported <%s> target\n", stype);
+            errlog("[-] config: unsupported <%s> target\n", stype);
         }
     }
 
@@ -109,7 +109,7 @@ container_t *container_load(container_t *c) {
     // setting up config path
     sprintf(path, "%s/%s/%s-logs.json", CONFDIR, c->namespace, c->id);
 
-    printf("[+] loading configuration: %s\n", path);
+    log("[+] loading configuration: %s\n", path);
     if(!(buffer = container_load_config(path)))
         return NULL;
 
@@ -117,7 +117,7 @@ container_t *container_load(container_t *c) {
     // printf(">> %s\n", buffer);
 
     if(!(root = json_loads(buffer, 0, &error))) {
-        fprintf(stderr, "json error: %d: %s\n", error.line, error.text);
+        errlog("json error: %d: %s\n", error.line, error.text);
         return NULL;
     }
 
